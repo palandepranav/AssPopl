@@ -1,7 +1,6 @@
 package AssPopl;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 
 public class Scope {
 	ArrayList<Symbol> symbols;
@@ -9,8 +8,8 @@ public class Scope {
 	ArrayList<Scope> childScopes;
 	public Scope()
 	{
-		this.symbols=new ArrayList<>();
-		this.childScopes=new ArrayList<>();
+		this.symbols=new ArrayList<Symbol>();
+		this.childScopes=new ArrayList<Scope>();
 		//this.parentScope=new SymbolTable();
 		this.parentScope=null;
 		
@@ -43,21 +42,28 @@ public class Scope {
 	public void insert(String name,String type,String kind)
 	{	
 		Symbol newSymbol=new Symbol(name, type, kind);
-		if(!symbols.contains(newSymbol))
+		//if(!symbols.contains(newSymbol))
 			symbols.add(newSymbol);
-		else
-			System.out.println("newSymbol already present");
+		//else
+			//System.out.println("newSymbol already present");
 	}
 	public String toString()
-	{
-		return "";
+	{	
+		StringBuilder s1=new StringBuilder("");
+		for  (Symbol s:symbols)
+		{
+			s1.append(s.toString());
+		}
+		return new String(s1);
 	}
 	
 	public Symbol findName(String name,ArrayList<Symbol> symbol)
-	{
+	{	
+		if(symbol==null)
+			return null;
 		for(Symbol s:symbol)
 		{
-			if(s.identifier==name)
+			if((s.identifier).equals(name))
 				return s;
 		}
 		return null;
@@ -66,28 +72,43 @@ public class Scope {
 	{
 		//SymbolTable tempSymbolTable=new SymbolTable();
 		Scope currentScope=this;
-		while(currentScope.getParentScope()!=null)
+		while(currentScope!=null)
 		{
 			Symbol s=findName(name,currentScope.symbols);
 			if(s!=null)
+			{
+				System.out.print("Found\t");
 				return s;
+			}
+				
 			currentScope=currentScope.getParentScope();
+			
 		}
 		//return tempSymbol;
+		System.out.println("Not found");
 		return null;
 	}
-	public void enter_scope(Scope currentScope)
-	{
+	public Scope enter_scope()
+	{	
+		System.out.println("Entering new scope");
 		Scope newScope=new Scope();
-		newScope.setParentScope(currentScope);
-		(currentScope.childScopes).add(newScope);
+		newScope.setParentScope(this);
+		(this.childScopes).add(newScope);
+		return newScope;
 		
 	}
-	public void exit_scope(Scope currentScope)
+	public void exit_scope()
 	{
-		Scope newScope=currentScope.getParentScope();
-		newScope.childScopes.remove(currentScope);
-		currentScope.symbols=null;
+		System.out.println("Exiting current scope");
+		if(this.getParentScope()!=null)
+		{
+			Scope newScope=this.getParentScope();
+			newScope.childScopes.remove(this);
+		}
+		if(this.symbols!=null)
+			this.symbols=null;
+		if(this.childScopes!=null)
+			this.childScopes=null;
 	}
 	
 }
